@@ -2,19 +2,19 @@ import osUtils from 'os-utils';
 import fs from 'fs';
 import os from 'os';
 import { BrowserWindow } from 'electron';
+import { ipcWebContentsSend } from './util.js';
+import { Statistics } from '../../types.js';
 const POLLING_INTERVAL = 500;
 
 export function pollResources(mainWindow: BrowserWindow) {
     setInterval(async () => {
-        const resourceUsage = {
-            cpu: await getCpuUsage(),
+        const resourceUsage: Statistics = {
+            cpu: await getCpuUsage() as number,
             ram: getRamUsage(),
             disk: getStorageData()
         };
 
-        mainWindow.webContents.send('statistics', resourceUsage);
-
-        console.log('Resource Usage:', resourceUsage);
+        ipcWebContentsSend('statistics', resourceUsage);
     }, POLLING_INTERVAL);
 }
 
