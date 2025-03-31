@@ -1,15 +1,15 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { isDev } from './util.js';
-import { pollResources } from './resourceManager.js';
+import { pollResources, getStaticData } from './resourceManager.js';
+import { getPreloadPath } from './pathResolver.js';
 
 app.on('ready', () => {
     const mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false
+            preload: getPreloadPath()
         }
     });
 
@@ -19,7 +19,11 @@ app.on('ready', () => {
         mainWindow.loadFile(path.join(__dirname, '../../dist-react/index.html'));
     }
 
-    pollResources();
+    pollResources(mainWindow);
+
+    ipcMain.handle('getStaticData', () => {
+        return getStaticData();
+    });
 });
 
 app.on('window-all-closed', () => {
